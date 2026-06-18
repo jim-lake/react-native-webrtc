@@ -63,6 +63,7 @@
     self.selectedFormat = format;
 
     AVCaptureSession *session = self.capturer.captureSession;
+#if !TARGET_OS_OSX
     if (@available(iOS 16.0, *)) {
         BOOL enable = self.enableMultitaskingCameraAccess;
         BOOL shouldChange = session.multitaskingCameraAccessEnabled != enable;
@@ -74,6 +75,7 @@
             [session commitConfiguration];
         }
     }
+#endif
 
     RCTLog(@"[VideoCaptureController] Capture will start");
 
@@ -207,6 +209,7 @@
                       ofObject:(id)object
                         change:(NSDictionary<NSKeyValueChangeKey, id> *)change
                        context:(void *)context {
+#if !TARGET_OS_OSX
     if (@available(iOS 11.1, *)) {
         if ([object isKindOfClass:[AVCaptureDevice class]] && [keyPath isEqualToString:@"systemPressureState"]) {
             AVCaptureDevice *device = (AVCaptureDevice *)object;
@@ -225,6 +228,7 @@
             }
         }
     }
+#endif
 }
 
 - (void)registerSystemPressureStateObserverForDevice:(AVCaptureDevice *)device {

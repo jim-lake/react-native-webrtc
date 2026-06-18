@@ -3,40 +3,31 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0496A360A6F874C295C73D4B /* libPods-Shared-GumTestApp_macOS-macOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C8DBC48FD7C3AEF576C57B21 /* libPods-Shared-GumTestApp_macOS-macOS.a */; };
-		5142014D2437B4B30078DB4F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5142014C2437B4B30078DB4F /* AppDelegate.m */; };
-		514201502437B4B30078DB4F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5142014F2437B4B30078DB4F /* ViewController.m */; };
+		461378C2232DF9B52E9B1A29 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A09917672B033C47A90884A4 /* PrivacyInfo.xcprivacy */; };
+		5142014D2437B4B30078DB4F /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5142014C2437B4B30078DB4F /* AppDelegate.mm */; };
 		514201522437B4B40078DB4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 514201512437B4B40078DB4F /* Assets.xcassets */; };
 		514201552437B4B40078DB4F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 514201532437B4B40078DB4F /* Main.storyboard */; };
 		514201582437B4B40078DB4F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 514201572437B4B40078DB4F /* main.m */; };
-		DEA820F0256D46E5000673C7 /* WebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = DEA820EF256D46E5000673C7 /* WebRTC.xcframework */; };
+		63B3E0B091580F74E6B0A95C /* libPods-GumTestApp_macOS-macOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B2534CDA3C81C27973B97311 /* libPods-GumTestApp_macOS-macOS.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		02422F9FB6FF5F34B4E63E6F /* Pods-Shared-GumTestApp_macOS-macOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Shared-GumTestApp_macOS-macOS.debug.xcconfig"; path = "Target Support Files/Pods-Shared-GumTestApp_macOS-macOS/Pods-Shared-GumTestApp_macOS-macOS.debug.xcconfig"; sourceTree = "<group>"; };
-		38423A3E24576CBC00BC2EAC /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		514201492437B4B30078DB4F /* GumTestApp_macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GumTestApp_macOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5142014B2437B4B30078DB4F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		5142014C2437B4B30078DB4F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		5142014E2437B4B30078DB4F /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		5142014F2437B4B30078DB4F /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		5142014C2437B4B30078DB4F /* AppDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
 		514201512437B4B40078DB4F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		514201542437B4B40078DB4F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		514201562437B4B40078DB4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		514201572437B4B40078DB4F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		514201592437B4B40078DB4F /* GumTestApp_macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GumTestApp_macOS.entitlements; sourceTree = "<group>"; };
-		9D32DFD059D5DB6DDEF38881 /* Pods-Shared-GumTestApp_macOS-iOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Shared-GumTestApp_macOS-iOS.debug.xcconfig"; path = "Target Support Files/Pods-Shared-GumTestApp_macOS-iOS/Pods-Shared-GumTestApp_macOS-iOS.debug.xcconfig"; sourceTree = "<group>"; };
-		A82DFB63B157C65E5D698CA2 /* Pods-Shared-GumTestApp_macOS-iOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Shared-GumTestApp_macOS-iOS.release.xcconfig"; path = "Target Support Files/Pods-Shared-GumTestApp_macOS-iOS/Pods-Shared-GumTestApp_macOS-iOS.release.xcconfig"; sourceTree = "<group>"; };
-		C8DBC48FD7C3AEF576C57B21 /* libPods-Shared-GumTestApp_macOS-macOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Shared-GumTestApp_macOS-macOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		CE0E74F571E1F48FF00A8324 /* Pods-Shared-GumTestApp_macOS-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Shared-GumTestApp_macOS-macOS.release.xcconfig"; path = "Target Support Files/Pods-Shared-GumTestApp_macOS-macOS/Pods-Shared-GumTestApp_macOS-macOS.release.xcconfig"; sourceTree = "<group>"; };
-		DEA820EF256D46E5000673C7 /* WebRTC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = WebRTC.xcframework; path = "../node_modules/react-native-webrtc/apple/WebRTC.xcframework"; sourceTree = "<group>"; };
-		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
-		FB6EED1BDEABADF047CC5223 /* libPods-Shared-GumTestApp_macOS-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Shared-GumTestApp_macOS-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		84D634BF3C4C2242EDA1FE43 /* Pods-GumTestApp_macOS-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GumTestApp_macOS-macOS.release.xcconfig"; path = "Target Support Files/Pods-GumTestApp_macOS-macOS/Pods-GumTestApp_macOS-macOS.release.xcconfig"; sourceTree = "<group>"; };
+		A09917672B033C47A90884A4 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = ../PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		B2534CDA3C81C27973B97311 /* libPods-GumTestApp_macOS-macOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-GumTestApp_macOS-macOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA611DA6D1C0854D406E302E /* Pods-GumTestApp_macOS-macOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GumTestApp_macOS-macOS.debug.xcconfig"; path = "Target Support Files/Pods-GumTestApp_macOS-macOS/Pods-GumTestApp_macOS-macOS.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,69 +35,45 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DEA820F0256D46E5000673C7 /* WebRTC.xcframework in Frameworks */,
-				0496A360A6F874C295C73D4B /* libPods-Shared-GumTestApp_macOS-macOS.a in Frameworks */,
+				63B3E0B091580F74E6B0A95C /* libPods-GumTestApp_macOS-macOS.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1986A43FA6A91CFACDF0A798 /* Pods */ = {
+		3F363BF0885D833BC54D0142 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				9D32DFD059D5DB6DDEF38881 /* Pods-Shared-GumTestApp_macOS-iOS.debug.xcconfig */,
-				A82DFB63B157C65E5D698CA2 /* Pods-Shared-GumTestApp_macOS-iOS.release.xcconfig */,
-				02422F9FB6FF5F34B4E63E6F /* Pods-Shared-GumTestApp_macOS-macOS.debug.xcconfig */,
-				CE0E74F571E1F48FF00A8324 /* Pods-Shared-GumTestApp_macOS-macOS.release.xcconfig */,
+				DA611DA6D1C0854D406E302E /* Pods-GumTestApp_macOS-macOS.debug.xcconfig */,
+				84D634BF3C4C2242EDA1FE43 /* Pods-GumTestApp_macOS-macOS.release.xcconfig */,
 			);
+			name = Pods;
 			path = Pods;
-			sourceTree = "<group>";
-		};
-		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				DEA820EF256D46E5000673C7 /* WebRTC.xcframework */,
-				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
-				FB6EED1BDEABADF047CC5223 /* libPods-Shared-GumTestApp_macOS-iOS.a */,
-				C8DBC48FD7C3AEF576C57B21 /* libPods-Shared-GumTestApp_macOS-macOS.a */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		5142014A2437B4B30078DB4F /* GumTestApp_macOS-macOS */ = {
 			isa = PBXGroup;
 			children = (
-				38423A3E24576CBC00BC2EAC /* main.jsbundle */,
 				5142014B2437B4B30078DB4F /* AppDelegate.h */,
-				5142014C2437B4B30078DB4F /* AppDelegate.m */,
-				5142014E2437B4B30078DB4F /* ViewController.h */,
-				5142014F2437B4B30078DB4F /* ViewController.m */,
+				5142014C2437B4B30078DB4F /* AppDelegate.mm */,
 				514201512437B4B40078DB4F /* Assets.xcassets */,
 				514201532437B4B40078DB4F /* Main.storyboard */,
 				514201562437B4B40078DB4F /* Info.plist */,
 				514201572437B4B40078DB4F /* main.m */,
 				514201592437B4B40078DB4F /* GumTestApp_macOS.entitlements */,
+				A09917672B033C47A90884A4 /* PrivacyInfo.xcprivacy */,
 			);
 			path = "GumTestApp_macOS-macOS";
-			sourceTree = "<group>";
-		};
-		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Libraries;
 			sourceTree = "<group>";
 		};
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
 				5142014A2437B4B30078DB4F /* GumTestApp_macOS-macOS */,
-				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
-				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				1986A43FA6A91CFACDF0A798 /* Pods */,
+				3F363BF0885D833BC54D0142 /* Pods */,
+				F55EA549972BAA7D2DD451FB /* Frameworks */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -121,6 +88,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		F55EA549972BAA7D2DD451FB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B2534CDA3C81C27973B97311 /* libPods-GumTestApp_macOS-macOS.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -128,13 +103,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5142015A2437B4B40078DB4F /* Build configuration list for PBXNativeTarget "GumTestApp_macOS-macOS" */;
 			buildPhases = (
-				1A938104A937498D81B3BD3B /* [CP] Check Pods Manifest.lock */,
+				5E87A43BE0B1E800E4DE86DB /* [CP] Check Pods Manifest.lock */,
 				381D8A6F24576A6C00465D17 /* Start Packager */,
 				514201452437B4B30078DB4F /* Sources */,
 				514201462437B4B30078DB4F /* Frameworks */,
 				514201472437B4B30078DB4F /* Resources */,
 				381D8A6E24576A4E00465D17 /* Bundle React Native code and images */,
-				388C83E7AD855C8EEB2F6CBC /* [CP] Embed Pods Frameworks */,
+				437512135D9E8E60480C9E1B /* [CP] Embed Pods Frameworks */,
+				2AC6DF7A046E8D0C0AA4E4D1 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -151,16 +127,16 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1130;
+				LastUpgradeCheck = 1540;
 				TargetAttributes = {
 					514201482437B4B30078DB4F = {
-						CreatedOnToolsVersion = 11.4;
+						CreatedOnToolsVersion = 15.4;
 						ProvisioningStyle = Automatic;
 					};
 				};
 			};
 			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "GumTestApp_macOS" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -184,32 +160,28 @@
 			files = (
 				514201522437B4B40078DB4F /* Assets.xcassets in Resources */,
 				514201552437B4B40078DB4F /* Main.storyboard in Resources */,
+				461378C2232DF9B52E9B1A29 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		1A938104A937498D81B3BD3B /* [CP] Check Pods Manifest.lock */ = {
+		2AC6DF7A046E8D0C0AA4E4D1 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GumTestApp_macOS-macOS/Pods-GumTestApp_macOS-macOS-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
+			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Shared-GumTestApp_macOS-macOS-checkManifestLockResult.txt",
+				"${PODS_ROOT}/Target Support Files/Pods-GumTestApp_macOS-macOS/Pods-GumTestApp_macOS-macOS-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GumTestApp_macOS-macOS/Pods-GumTestApp_macOS-macOS-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		381D8A6E24576A4E00465D17 /* Bundle React Native code and images */ = {
@@ -248,22 +220,43 @@
 			shellPath = /bin/sh;
 			shellScript = "export RCT_METRO_PORT=\"${RCT_METRO_PORT:=8081}\"\necho \"export RCT_METRO_PORT=${RCT_METRO_PORT}\" > \"${SRCROOT}/../node_modules/react-native-macos/scripts/.packager.env\"\nif [ -z \"${RCT_NO_LAUNCH_PACKAGER+xxx}\" ] ; then\n  if nc -w 5 -z localhost ${RCT_METRO_PORT} ; then\n    if ! curl -s \"http://localhost:${RCT_METRO_PORT}/status\" | grep -q \"packager-status:running\" ; then\n      echo \"Port ${RCT_METRO_PORT} already in use, packager is either not running or not running correctly\"\n      exit 2\n    fi\n  else\n    open \"$SRCROOT/../node_modules/react-native-macos/scripts/launchPackager.command\" || echo \"Can't start packager automatically\"\n  fi\nfi\n";
 		};
-		388C83E7AD855C8EEB2F6CBC /* [CP] Embed Pods Frameworks */ = {
+		437512135D9E8E60480C9E1B /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Shared-GumTestApp_macOS-macOS/Pods-Shared-GumTestApp_macOS-macOS-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/WebRTC/WebRTC.framework/WebRTC",
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GumTestApp_macOS-macOS/Pods-GumTestApp_macOS-macOS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/WebRTC.framework",
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GumTestApp_macOS-macOS/Pods-GumTestApp_macOS-macOS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Shared-GumTestApp_macOS-macOS/Pods-Shared-GumTestApp_macOS-macOS-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GumTestApp_macOS-macOS/Pods-GumTestApp_macOS-macOS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5E87A43BE0B1E800E4DE86DB /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-GumTestApp_macOS-macOS-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -273,9 +266,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				514201502437B4B30078DB4F /* ViewController.m in Sources */,
 				514201582437B4B40078DB4F /* main.m in Sources */,
-				5142014D2437B4B30078DB4F /* AppDelegate.m in Sources */,
+				5142014D2437B4B30078DB4F /* AppDelegate.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -295,20 +287,20 @@
 /* Begin XCBuildConfiguration section */
 		5142015B2437B4B40078DB4F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 02422F9FB6FF5F34B4E63E6F /* Pods-Shared-GumTestApp_macOS-macOS.debug.xcconfig */;
+			baseConfigurationReference = DA611DA6D1C0854D406E302E /* Pods-GumTestApp_macOS-macOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = "GumTestApp_macOS-macos/Info.plist";
+				INFOPLIST_FILE = "GumTestApp_macOS-macOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/Frameworks",
+					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -323,19 +315,20 @@
 		};
 		5142015C2437B4B40078DB4F /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CE0E74F571E1F48FF00A8324 /* Pods-Shared-GumTestApp_macOS-macOS.release.xcconfig */;
+			baseConfigurationReference = 84D634BF3C4C2242EDA1FE43 /* Pods-GumTestApp_macOS-macOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
-				INFOPLIST_FILE = "GumTestApp_macOS-macos/Info.plist";
+				INFOPLIST_FILE = "GumTestApp_macOS-macOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/Frameworks",
+					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -353,7 +346,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -376,11 +369,10 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -395,19 +387,17 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
-					"\"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)\"",
-					"\"$(inherited)\"",
-				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = iphoneos;
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				USE_HERMES = true;
 			};
 			name = Debug;
 		};
@@ -416,7 +406,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -439,11 +429,10 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -451,18 +440,15 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
-					"\"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)\"",
-					"\"$(inherited)\"",
-				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				SDKROOT = iphoneos;
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
+				SDKROOT = macosx;
+				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

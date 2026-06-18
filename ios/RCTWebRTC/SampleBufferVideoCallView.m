@@ -1,3 +1,5 @@
+#import <TargetConditionals.h>
+#if !TARGET_OS_OSX
 #import "SampleBufferVideoCallView.h"
 #import <Accelerate/Accelerate.h>
 #import <WebRTC/WebRTC.h>
@@ -176,3 +178,4 @@
 }
 
 @end
+#endif

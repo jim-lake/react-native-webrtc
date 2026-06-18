@@ -1,17 +1,19 @@
-/**
- * Metro configuration for React Native
- * https://github.com/facebook/react-native
- *
- * @format
- */
+const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const path = require('path');
 
-module.exports = {
-  transformer: {
-    getTransformOptions: async () => ({
-      transform: {
-        experimentalImportSupport: false,
-        inlineRequires: false,
-      },
-    }),
+const webrtcRoot = path.resolve(__dirname, '../../');
+const rnMacosPath = path.resolve(__dirname, 'node_modules/react-native-macos');
+
+const config = {
+  watchFolders: [webrtcRoot],
+  resolver: {
+    extraNodeModules: {
+      'react-native': rnMacosPath,
+      react: path.resolve(__dirname, 'node_modules/react'),
+    },
+    platforms: ['macos', 'ios', 'android'],
+    nodeModulesPaths: [path.resolve(__dirname, 'node_modules')],
   },
 };
+
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);

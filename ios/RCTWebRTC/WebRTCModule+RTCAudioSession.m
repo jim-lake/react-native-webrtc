@@ -1,3 +1,6 @@
+#import <TargetConditionals.h>
+#if !TARGET_OS_OSX
+
 #import <objc/runtime.h>
 
 #import <React/RCTBridge.h>
@@ -18,3 +21,5 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(audioSessionDidDeactivate) {
 }
 
 @end
+
+#endif

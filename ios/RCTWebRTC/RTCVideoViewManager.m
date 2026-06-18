@@ -7,7 +7,8 @@
 
 #import <WebRTC/RTCMediaStream.h>
 #if TARGET_OS_OSX
-#import <WebRTC/RTCMTLNSVideoView.h>
+// Use NSClassFromString at runtime since RTCMTLNSVideoView may not be available
+#import <WebRTC/RTCVideoRenderer.h>
 #else
 #import <WebRTC/RTCMTLVideoView.h>
 #endif
@@ -42,13 +43,15 @@
 
 @property(nonatomic) BOOL enablePIP;
 
+#if !TARGET_OS_OSX
 @property(nonatomic, strong) API_AVAILABLE(ios(15.0)) PIPController *pipController;
+#endif
 
 /**
  * The {@link RRTCVideoRenderer} which implements the actual rendering.
  */
 #if TARGET_OS_OSX
-@property(nonatomic, readonly) RTCMTLNSVideoView *videoView;
+@property(nonatomic, readonly) NSView<RTCVideoRenderer> *videoView;
 #else
 @property(nonatomic, readonly) RTCMTLVideoView *videoView;
 #endif
@@ -73,7 +76,9 @@
 @implementation RTCVideoView
 
 @synthesize videoView = _videoView;
+#if !TARGET_OS_OSX
 @synthesize pipController = _pipController;
+#endif
 
 /**
  * Tells this view that its window object changed.
@@ -87,7 +92,7 @@
     // videoTrack only while this view resides in a window.
     RTCVideoTrack *videoTrack = self.videoTrack;
 
-    if (videoTrack) {
+    if (videoTrack && self.videoView) {
         if (self.window) {
             dispatch_async(_module.workerQueue, ^{
                 [videoTrack addRenderer:self.videoView];
@@ -109,16 +114,27 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
 #if TARGET_OS_OSX
-        RTCMTLNSVideoView *subview = [[RTCMTLNSVideoView alloc] initWithFrame:CGRectZero];
-        subview.wantsLayer = true;
-        _videoView = subview;
+        Class MTLViewClass = NSClassFromString(@"RTCMTLNSVideoView");
+        if (MTLViewClass) {
+            NSView *subview = [[MTLViewClass alloc] initWithFrame:CGRectZero];
+            subview.wantsLayer = YES;
+            _videoView = (id)subview;
+        }
 #else
         RTCMTLVideoView *subview = [[RTCMTLVideoView alloc] initWithFrame:CGRectZero];
         _videoView = subview;
 #endif
         _objectFit = RTCVideoViewObjectFitCover;
-        [self addSubview:self.videoView];
-        self.videoView.delegate = self;
+        if (self.videoView) {
+            [self addSubview:self.videoView];
+#if TARGET_OS_OSX
+            if ([self.videoView respondsToSelector:@selector(setDelegate:)]) {
+                [(id)self.videoView setDelegate:self];
+            }
+#else
+            self.videoView.delegate = self;
+#endif
+        }
     }
 
     return self;
@@ -146,17 +162,32 @@
 - (void)setMirror:(BOOL)mirror {
     if (_mirror != mirror) {
         _mirror = mirror;
-
+#if TARGET_OS_OSX
+        self.videoView.wantsLayer = YES;
+        if (mirror) {
+            self.videoView.layer.affineTransform = CGAffineTransformMakeScale(-1.0, 1.0);
+        } else {
+            self.videoView.layer.affineTransform = CGAffineTransformIdentity;
+        }
+#else
         self.videoView.transform = mirror ? CGAffineTransformMakeScale(-1.0, 1.0) : CGAffineTransformIdentity;
+#endif
     }
 }
 
+#if TARGET_OS_OSX
+- (void)insertReactSubview:(NSView *)subview atIndex:(NSInteger)atIndex {
+#else
 - (void)insertReactSubview:(UIView *)subview atIndex:(NSInteger)atIndex {
+#endif
     // All subviews are treated as fallback views
+#if !TARGET_OS_OSX
     [_pipController insertFallbackView:subview];
+#endif
 }
 
 - (void)API_AVAILABLE(ios(15.0))setPIPOptions:(NSDictionary *)pipOptions {
+#if !TARGET_OS_OSX
     if (!pipOptions) {
         _pipController = nil;
         return;
@@ -201,14 +232,19 @@
     _pipController.stopAutomatically = stopAutomatically;
     _pipController.objectFit = _objectFit;
     _pipController.preferredSize = preferredSize;
+#endif
 }
 
 - (void)API_AVAILABLE(ios(15.0))startPIP {
+#if !TARGET_OS_OSX
     [_pipController startPIP];
+#endif
 }
 
 - (void)API_AVAILABLE(ios(15.0))stopPIP {
+#if !TARGET_OS_OSX
     [_pipController stopPIP];
+#endif
 }
 
 /**
@@ -230,7 +266,9 @@
         }
 #endif
         if (@available(iOS 15.0, *)) {
+#if !TARGET_OS_OSX
             _pipController.objectFit = fit;
+#endif
         }
     }
 }
@@ -246,13 +284,15 @@
     RTCVideoTrack *oldValue = self.videoTrack;
 
     if (oldValue != videoTrack) {
-        if (oldValue) {
+        if (oldValue && self.videoView) {
             dispatch_async(_module.workerQueue, ^{
                 [oldValue removeRenderer:self.videoView];
             });
         }
 
+#if !TARGET_OS_OSX
         [_pipController setVideoTrack:videoTrack];
+#endif
         _videoTrack = videoTrack;
 
         // Clear the videoView by rendering a 2x2 blank frame.
@@ -284,13 +324,15 @@
                                                                  rotation:RTCVideoRotation_0
                                                               timeStampNs:time] newI420VideoFrame];
 
-            [self.videoView renderFrame:frame];
+            if (self.videoView) {
+                [self.videoView renderFrame:frame];
+            }
 
             CVPixelBufferRelease(pixelBuffer);
         }
 
         // See "didMoveToWindow" above.
-        if (videoTrack && self.window) {
+        if (videoTrack && self.window && self.videoView) {
             dispatch_async(_module.workerQueue, ^{
                 [videoTrack addRenderer:self.videoView];
             });
@@ -378,6 +420,7 @@ RCT_CUSTOM_VIEW_PROPERTY(iosPIP, NSDictionary *, RTCVideoView) {
 }
 
 RCT_EXPORT_METHOD(startIOSPIP : (nonnull NSNumber *)reactTag) {
+#if !TARGET_OS_OSX
     if (@available(iOS 15.0, *)) {
         RCTUIManager *uiManager = [self.bridge moduleForClass:[RCTUIManager class]];
         [uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
@@ -389,9 +432,11 @@ RCT_EXPORT_METHOD(startIOSPIP : (nonnull NSNumber *)reactTag) {
             [(RTCVideoView *)view startPIP];
         }];
     }
+#endif
 }
 
 RCT_EXPORT_METHOD(stopIOSPIP : (nonnull NSNumber *)reactTag) {
+#if !TARGET_OS_OSX
     if (@available(iOS 15.0, *)) {
         RCTUIManager *uiManager = [self.bridge moduleForClass:[RCTUIManager class]];
         [uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
@@ -403,6 +448,7 @@ RCT_EXPORT_METHOD(stopIOSPIP : (nonnull NSNumber *)reactTag) {
             [(RTCVideoView *)view stopPIP];
         }];
     }
+#endif
 }
 + (BOOL)requiresMainQueueSetup {
     return NO;

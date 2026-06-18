@@ -9,7 +9,12 @@
 //
 
 #import <Accelerate/Accelerate.h>
+#import <TargetConditionals.h>
+#if TARGET_OS_OSX
+#import <AppKit/AppKit.h>
+#else
 #import <UIKit/UIKit.h>
+#endif
 #import <WebRTC/WebRTC.h>
 
 @interface I420Converter : NSObject

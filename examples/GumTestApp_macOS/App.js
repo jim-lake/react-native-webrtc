@@ -1,9 +1,5 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
+ * Sample React Native App for macOS - WebRTC GUM Test
  */
 
 import React, {useState} from 'react';
@@ -11,30 +7,28 @@ import {
   Button,
   SafeAreaView,
   StyleSheet,
-  ScrollView,
   View,
-  Text,
   StatusBar,
 } from 'react-native';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { mediaDevices, RTCView } from 'react-native-webrtc';
+import {mediaDevices, RTCView} from 'react-native-webrtc';
 
-const App: () => React$Node = () => {
+const App = () => {
   const [stream, setStream] = useState(null);
+
   const start = async () => {
     console.log('start');
     const devices = await mediaDevices.enumerateDevices();
     console.log(devices);
     if (!stream) {
-      let s;
       try {
-        s = await mediaDevices.getUserMedia({ video: true });
+        const s = await mediaDevices.getUserMedia({video: true});
         setStream(s);
-      } catch(e) {
+      } catch (e) {
         console.error(e);
       }
     }
   };
+
   const stop = () => {
     console.log('stop');
     if (stream) {
@@ -42,24 +36,17 @@ const App: () => React$Node = () => {
       setStream(null);
     }
   };
+
   return (
     <>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView style={styles.body}>
-      {
-        stream &&
-          <RTCView
-            streamURL={stream.toURL()}
-            style={styles.stream} />
-      }
-        <View
-          style={styles.footer}>
-          <Button
-            title = "Start"
-            onPress = {start} />
-          <Button
-            title = "Stop"
-            onPress = {stop} />
+        {stream && (
+          <RTCView streamURL={stream.toURL()} style={styles.stream} />
+        )}
+        <View style={styles.footer}>
+          <Button title="Start" onPress={start} />
+          <Button title="Stop" onPress={stop} />
         </View>
       </SafeAreaView>
     </>
@@ -68,18 +55,18 @@ const App: () => React$Node = () => {
 
 const styles = StyleSheet.create({
   body: {
-    backgroundColor: Colors.white,
-    ...StyleSheet.absoluteFill
+    backgroundColor: '#ffffff',
+    ...StyleSheet.absoluteFillObject,
   },
   stream: {
-    flex: 1
+    flex: 1,
   },
   footer: {
-    backgroundColor: Colors.lighter,
+    backgroundColor: '#f3f3f3',
     position: 'absolute',
     bottom: 0,
     left: 0,
-    right: 0
+    right: 0,
   },
 });
 

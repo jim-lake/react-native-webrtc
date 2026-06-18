@@ -1,3 +1,6 @@
+#import <TargetConditionals.h>
+#if !TARGET_OS_OSX
+
 #import <AVKit/AVKit.h>
 #import <Foundation/Foundation.h>
 #import <React/RCTViewManager.h>
@@ -10,3 +13,5 @@
 
 - (void)requestScaleRecalculation;
 @end
+
+#endif

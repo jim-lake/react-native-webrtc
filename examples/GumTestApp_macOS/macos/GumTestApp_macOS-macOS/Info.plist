@@ -35,15 +35,15 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access for WebRTC video calls.</string>
 	<key>NSMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires microphone access for WebRTC audio calls.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>NSSupportsAutomaticTermination</key>
+	<key>RCTNewArchEnabled</key>
 	<true/>
-	<key>NSSupportsSuddenTermination</key>
-	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>CAN I HAZ THE CAMERA</string>
 </dict>
 </plist>

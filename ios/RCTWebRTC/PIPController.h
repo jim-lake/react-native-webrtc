@@ -1,3 +1,6 @@
+#import <TargetConditionals.h>
+#if !TARGET_OS_OSX
+
 #import <AVKit/AVKit.h>
 #import <UIKit/UIKit.h>
 #import <WebRTC/RTCVideoTrack.h>
@@ -22,3 +25,5 @@ API_AVAILABLE(ios(15.0))
 - (void)setObjectFit:(RTCVideoViewObjectFit)fit;
 
 @end
+
+#endif
