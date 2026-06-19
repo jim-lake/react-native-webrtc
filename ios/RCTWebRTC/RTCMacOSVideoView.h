@@ -6,7 +6,7 @@
  * Fallback video renderer for macOS using AVSampleBufferDisplayLayer.
  * Used when RTCMTLNSVideoView is not available in the WebRTC framework binary.
  */
-@interface RTCMacOSVideoView : NSView <RTCVideoRenderer>
+@interface RTCMacOSVideoView : NSView<RTCVideoRenderer>
 
 @property(nonatomic, weak) id<RTCVideoViewDelegate> delegate;
 @property(nonatomic, copy) NSString *videoGravity;

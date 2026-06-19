@@ -121,12 +121,10 @@
 #if TARGET_OS_OSX
         Class MTLViewClass = NSClassFromString(@"RTCMTLNSVideoView");
         if (MTLViewClass) {
-            RCTLog(@"RTCVideoView: using RTCMTLNSVideoView for rendering");
             NSView *subview = [[MTLViewClass alloc] initWithFrame:CGRectZero];
             subview.wantsLayer = YES;
             _videoView = (id)subview;
         } else {
-            RCTLogWarn(@"RTCVideoView: RTCMTLNSVideoView not available in WebRTC framework, using fallback CoreImage renderer");
             RTCMacOSVideoView *fallback = [[RTCMacOSVideoView alloc] initWithFrame:CGRectZero];
             _videoView = (id)fallback;
         }
@@ -273,9 +271,8 @@
 #if TARGET_OS_OSX
         if ([self.videoView isKindOfClass:[RTCMacOSVideoView class]]) {
             RTCMacOSVideoView *fallback = (RTCMacOSVideoView *)self.videoView;
-            fallback.videoGravity = (fit == RTCVideoViewObjectFitCover)
-                ? AVLayerVideoGravityResizeAspectFill
-                : AVLayerVideoGravityResizeAspect;
+            fallback.videoGravity = (fit == RTCVideoViewObjectFitCover) ? AVLayerVideoGravityResizeAspectFill
+                                                                        : AVLayerVideoGravityResizeAspect;
         }
 #else
         if (fit == RTCVideoViewObjectFitCover) {
@@ -444,7 +441,9 @@ RCT_CUSTOM_VIEW_PROPERTY(streamURL, NSString *, RTCVideoView) {
         NSArray *videoTracks = stream.videoTracks;
         RTCVideoTrack *videoTrack = [videoTracks firstObject];
         if (!videoTrack) {
-            RCTLogWarn(@"RTCVideoView: stream found but has no video tracks, react tag: %@, audioTracks=%lu", streamReactTag, (unsigned long)stream.audioTracks.count);
+            RCTLogWarn(@"RTCVideoView: stream found but has no video tracks, react tag: %@, audioTracks=%lu",
+                       streamReactTag,
+                       (unsigned long)stream.audioTracks.count);
         } else {
             RCTLog(@"RTCVideoView: found video track %@ for stream %@", videoTrack.trackId, streamReactTag);
             dispatch_async(dispatch_get_main_queue(), ^{
