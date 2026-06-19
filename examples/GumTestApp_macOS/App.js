@@ -52,6 +52,29 @@ const App = () => {
     setLog(logRef.current);
   }, []);
 
+  const logCodecs = async (pc) => {
+    try {
+      const stats = await pc.getStats();
+      stats.forEach((report) => {
+        if (report.type === "codec") {
+          addLog(
+            `Codec: ${report.mimeType} pt=${report.payloadType} clock=${report.clockRate}`,
+          );
+        } else if (report.type === "inbound-rtp" && report.kind === "video") {
+          addLog(
+            `Inbound video: codec=${report.codecId} decoder=${report.decoderImplementation} ${report.frameWidth}x${report.frameHeight}`,
+          );
+        } else if (report.type === "outbound-rtp" && report.kind === "video") {
+          addLog(
+            `Outbound video: codec=${report.codecId} encoder=${report.encoderImplementation} ${report.frameWidth}x${report.frameHeight}`,
+          );
+        }
+      });
+    } catch (e) {
+      addLog("logCodecs error: " + e.message);
+    }
+  };
+
   const finishGathering = (pc) => {
     addLog("finishGathering called, already=" + gatheredRef.current);
     if (gatheredRef.current) return;
@@ -124,8 +147,10 @@ const App = () => {
     pc.onconnectionstatechange = () => {
       addLog("Connection: " + pc.connectionState);
       const state = pc.connectionState;
-      if (state === "connected") setConnectionStatus("Connected");
-      else if (state === "connecting") setConnectionStatus("Connecting...");
+      if (state === "connected") {
+        setConnectionStatus("Connected");
+        logCodecs(pc);
+      } else if (state === "connecting") setConnectionStatus("Connecting...");
       else if (state === "failed") setConnectionStatus("Failed");
       else if (state === "disconnected") setConnectionStatus("Disconnected");
       else if (state === "closed") setConnectionStatus("Closed");
@@ -484,13 +509,9 @@ const App = () => {
         <View style={styles.logPanel}>
           <Text style={styles.logTitle}>Log</Text>
           <ScrollView style={styles.logScroll}>
-            <TextInput
-              style={styles.logText}
-              value={log}
-              editable={false}
-              multiline
-              selectTextOnFocus
-            />
+            <Text style={styles.logText} selectable>
+              {log}
+            </Text>
           </ScrollView>
         </View>
       </View>
