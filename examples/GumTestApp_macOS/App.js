@@ -214,6 +214,8 @@ const App = () => {
         stream.getTracks().forEach((track) => pc.addTrack(track, stream));
         addLog("Added " + stream.getTracks().length + " tracks");
       }
+      if (!enableVideo) pc.addTransceiver('video', { direction: 'recvonly' });
+      if (!enableAudio) pc.addTransceiver('audio', { direction: 'recvonly' });
 
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);

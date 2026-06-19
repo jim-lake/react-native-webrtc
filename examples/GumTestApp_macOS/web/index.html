@@ -374,6 +374,8 @@
             document.getElementById("localPlaceholder").style.display = "none";
             localStream.getTracks().forEach((t) => pc.addTrack(t, localStream));
           }
+          if (!v) pc.addTransceiver('video', { direction: 'recvonly' });
+          if (!a) pc.addTransceiver('audio', { direction: 'recvonly' });
           const offer = await pc.createOffer();
           await pc.setLocalDescription(offer);
           addLog("Offer created, waiting for ICE...");
