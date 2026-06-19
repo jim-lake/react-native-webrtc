@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebRTC Offer/Answer Test</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #fff;
+        height: 100vh;
+        display: flex;
+      }
+      .main-row {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+      .content {
+        flex: 1;
+        padding: 12px;
+        overflow-y: auto;
+      }
+      .video-container {
+        display: flex;
+        height: 160px;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .video-wrapper {
+        flex: 1;
+        background: #1a1a2e;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .video-wrapper video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .video-placeholder {
+        color: #888;
+        font-size: 13px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        margin: 4px 0;
+      }
+      .switch-row {
+        display: flex;
+        align-items: center;
+        margin-right: 12px;
+      }
+      .switch-row label {
+        font-size: 13px;
+        color: #111;
+        margin-right: 6px;
+      }
+      .status-bar {
+        margin-top: 8px;
+        padding: 6px 10px;
+        background: #1a1a2e;
+        border-radius: 4px;
+      }
+      .status-text {
+        color: #4ade80;
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .panels-row {
+        display: flex;
+        margin-top: 8px;
+      }
+      .panel {
+        flex: 1;
+      }
+      .divider {
+        width: 1px;
+        background: #ccc;
+        margin: 0 12px;
+      }
+      .label {
+        margin-top: 8px;
+        margin-bottom: 2px;
+        font-weight: 600;
+        color: #111;
+        font-size: 12px;
+      }
+      textarea {
+        border: 1px solid #999;
+        border-radius: 4px;
+        padding: 6px;
+        height: 80px;
+        font-family: Menlo, monospace;
+        font-size: 10px;
+        color: #111;
+        background: #fff;
+        width: 100%;
+        resize: vertical;
+      }
+      textarea.readonly {
+        background: #f0f0f0;
+        color: #666;
+      }
+      .btn {
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 5px;
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer;
+        margin-top: 4px;
+      }
+      .btn-green {
+        background: #16a34a;
+      }
+      .btn-red {
+        background: #dc2626;
+      }
+      .data-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .data-row input {
+        flex: 1;
+        border: 1px solid #999;
+        border-radius: 4px;
+        padding: 6px;
+        font-family: Menlo, monospace;
+        font-size: 10px;
+        height: 36px;
+      }
+      .log-panel {
+        width: 400px;
+        border-left: 1px solid #ccc;
+        background: #fafafa;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+      }
+      .log-title {
+        font-weight: 700;
+        font-size: 12px;
+        color: #333;
+        margin-bottom: 4px;
+      }
+      .log-scroll {
+        flex: 1;
+        overflow-y: auto;
+      }
+      .log-scroll pre {
+        font-family: Menlo, monospace;
+        font-size: 9px;
+        color: #333;
+        line-height: 14px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-row">
+      <div class="content">
+        <div class="video-container">
+          <div class="video-wrapper">
+            <video id="localVideo" autoplay muted playsinline></video>
+            <span class="video-placeholder" id="localPlaceholder"
+              >Local Video</span
+            >
+          </div>
+          <div class="video-wrapper">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <span class="video-placeholder" id="remotePlaceholder"
+              >Remote Video</span
+            >
+          </div>
+        </div>
+        <div class="row">
+          <div class="switch-row">
+            <label>Video</label
+            ><input type="checkbox" id="enableVideo" checked />
+          </div>
+          <div class="switch-row">
+            <label>Audio</label
+            ><input type="checkbox" id="enableAudio" checked />
+          </div>
+          <button class="btn btn-red" onclick="reset()">Reset</button>
+        </div>
+        <div class="status-bar">
+          <span class="status-text" id="status">Status: Idle</span>
+        </div>
+        <div class="panels-row">
+          <div class="panel">
+            <button class="btn" onclick="createOffer()">Create Offer</button>
+            <div class="label">Local Offer (copy this):</div>
+            <textarea
+              id="localOffer"
+              class="readonly"
+              readonly
+              placeholder="Offer will appear here..."
+            ></textarea>
+            <div class="label">Paste Remote Answer:</div>
+            <textarea
+              id="remoteAnswerInput"
+              placeholder="Paste answer JSON here"
+            ></textarea>
+            <button
+              class="btn btn-green"
+              style="margin-top: 8px"
+              onclick="connect()"
+            >
+              Connect
+            </button>
+          </div>
+          <div class="divider"></div>
+          <div class="panel">
+            <div class="label">Paste Remote Offer:</div>
+            <textarea
+              id="remoteOfferInput"
+              placeholder="Paste offer JSON here"
+            ></textarea>
+            <button
+              class="btn"
+              style="margin-top: 8px"
+              onclick="createAnswer()"
+            >
+              Create Answer
+            </button>
+            <div class="label">Local Answer (copy this):</div>
+            <textarea
+              id="localAnswer"
+              class="readonly"
+              readonly
+              placeholder="Answer will appear here..."
+            ></textarea>
+          </div>
+        </div>
+        <div class="panels-row">
+          <div class="panel">
+            <div class="label">Data Input:</div>
+            <div class="data-row">
+              <input type="text" id="dataInput" placeholder="Type message..." />
+              <button class="btn" onclick="sendData()">Send</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="panel">
+            <div class="label">Data Output:</div>
+            <textarea
+              id="dataOutput"
+              class="readonly"
+              readonly
+              style="height: 60px"
+              placeholder="Received data appears here..."
+            ></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="log-panel">
+        <div class="log-title">Log</div>
+        <div class="log-scroll"><pre id="logPre"></pre></div>
+      </div>
+    </div>
+    <script>
+      const configuration = {
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      };
+      let pc = null,
+        sendChannel = null,
+        localStream = null,
+        iceCandidates = [],
+        gathered = false;
+
+      function addLog(msg) {
+        const ts = new Date().toLocaleTimeString();
+        document.getElementById("logPre").textContent += `[${ts}] ${msg}\n`;
+        document.querySelector(".log-scroll").scrollTop = 1e9;
+      }
+
+      function setStatus(s) {
+        document.getElementById("status").textContent = "Status: " + s;
+      }
+
+      function finishGathering() {
+        if (gathered) return;
+        gathered = true;
+        const desc = pc.localDescription;
+        if (!desc) return;
+        const payload = JSON.stringify({
+          sdp: { type: desc.type, sdp: desc.sdp },
+          candidates: iceCandidates,
+        });
+        addLog("Gathered " + iceCandidates.length + " candidates");
+        if (desc.type === "offer") {
+          document.getElementById("localOffer").value = payload;
+          setStatus("Waiting for remote answer");
+        } else {
+          document.getElementById("localAnswer").value = payload;
+          setStatus("Waiting for offerer to connect");
+        }
+      }
+
+      function createPeerConnection() {
+        pc = new RTCPeerConnection(configuration);
+        iceCandidates = [];
+        gathered = false;
+
+        sendChannel = pc.createDataChannel("data");
+        sendChannel.onopen = () => addLog("Send data channel open");
+        sendChannel.onclose = () => addLog("Send data channel closed");
+
+        pc.ondatachannel = (e) => {
+          addLog("Received data channel: " + e.channel.label);
+          e.channel.onmessage = (msg) => {
+            addLog("Data received: " + msg.data);
+            document.getElementById("dataOutput").value += msg.data + "\n";
+          };
+        };
+
+        let timer = null;
+        const scheduleFinish = () => {
+          clearTimeout(timer);
+          timer = setTimeout(() => finishGathering(), 2000);
+        };
+        scheduleFinish();
+
+        pc.onicecandidate = (e) => {
+          if (e.candidate) {
+            iceCandidates.push(e.candidate);
+            scheduleFinish();
+          } else finishGathering();
+        };
+        pc.onicegatheringstatechange = () => {
+          addLog("ICE gathering: " + pc.iceGatheringState);
+          if (pc.iceGatheringState === "complete") finishGathering();
+        };
+        pc.oniceconnectionstatechange = () =>
+          addLog("ICE connection: " + pc.iceConnectionState);
+        pc.onconnectionstatechange = () => {
+          addLog("Connection: " + pc.connectionState);
+          if (pc.connectionState === "connected") setStatus("Connected");
+          else if (pc.connectionState === "failed") setStatus("Failed");
+        };
+        pc.ontrack = (e) => {
+          addLog("Remote track: " + e.track.kind);
+          document.getElementById("remoteVideo").srcObject = e.streams[0];
+          document.getElementById("remotePlaceholder").style.display = "none";
+        };
+        return pc;
+      }
+
+      async function createOffer() {
+        addLog("Button: Create Offer");
+        try {
+          createPeerConnection();
+          const v = document.getElementById("enableVideo").checked,
+            a = document.getElementById("enableAudio").checked;
+          if (v || a) {
+            localStream = await navigator.mediaDevices.getUserMedia({
+              video: v,
+              audio: a,
+            });
+            document.getElementById("localVideo").srcObject = localStream;
+            document.getElementById("localPlaceholder").style.display = "none";
+            localStream.getTracks().forEach((t) => pc.addTrack(t, localStream));
+          }
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          addLog("Offer created, waiting for ICE...");
+        } catch (e) {
+          addLog("ERROR: " + e.message);
+        }
+      }
+
+      async function createAnswer() {
+        addLog("Button: Create Answer");
+        try {
+          const raw = document.getElementById("remoteOfferInput").value;
+          if (!raw) {
+            addLog("No remote offer pasted");
+            return;
+          }
+          const { sdp, candidates } = JSON.parse(raw);
+          createPeerConnection();
+          const v = document.getElementById("enableVideo").checked,
+            a = document.getElementById("enableAudio").checked;
+          if (v || a) {
+            localStream = await navigator.mediaDevices.getUserMedia({
+              video: v,
+              audio: a,
+            });
+            document.getElementById("localVideo").srcObject = localStream;
+            document.getElementById("localPlaceholder").style.display = "none";
+            localStream.getTracks().forEach((t) => pc.addTrack(t, localStream));
+          }
+          await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+          for (const c of candidates)
+            await pc.addIceCandidate(new RTCIceCandidate(c));
+          addLog("Added " + candidates.length + " remote ICE candidates");
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          addLog("Answer created, waiting for ICE...");
+        } catch (e) {
+          addLog("ERROR: " + e.message);
+        }
+      }
+
+      async function connect() {
+        addLog("Button: Connect");
+        try {
+          if (!pc) {
+            addLog("No peer connection");
+            return;
+          }
+          const raw = document.getElementById("remoteAnswerInput").value;
+          if (!raw) {
+            addLog("No remote answer pasted");
+            return;
+          }
+          const { sdp, candidates } = JSON.parse(raw);
+          await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+          for (const c of candidates)
+            await pc.addIceCandidate(new RTCIceCandidate(c));
+          addLog("Added " + candidates.length + " remote ICE candidates");
+        } catch (e) {
+          addLog("ERROR: " + e.message);
+        }
+      }
+
+      function sendData() {
+        if (!sendChannel || sendChannel.readyState !== "open") {
+          addLog("Data channel not open");
+          return;
+        }
+        const msg = document.getElementById("dataInput").value;
+        if (!msg) return;
+        sendChannel.send(msg);
+        addLog("Sent: " + msg);
+        document.getElementById("dataInput").value = "";
+      }
+
+      function reset() {
+        if (pc) pc.close();
+        if (localStream) localStream.getTracks().forEach((t) => t.stop());
+        pc = null;
+        sendChannel = null;
+        localStream = null;
+        iceCandidates = [];
+        gathered = false;
+        document.getElementById("localVideo").srcObject = null;
+        document.getElementById("remoteVideo").srcObject = null;
+        document.getElementById("localPlaceholder").style.display = "";
+        document.getElementById("remotePlaceholder").style.display = "";
+        [
+          "localOffer",
+          "localAnswer",
+          "remoteOfferInput",
+          "remoteAnswerInput",
+          "dataInput",
+          "dataOutput",
+        ].forEach((id) => (document.getElementById(id).value = ""));
+        setStatus("Idle");
+        addLog("Reset");
+      }
+    </script>
+  </body>
+</html>
