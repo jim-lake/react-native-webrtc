@@ -2,7 +2,7 @@
  * Sample React Native App for macOS - WebRTC Offer/Answer Test
  */
 
-import React, {useState, useRef} from 'react';
+import React, { useState, useRef, useCallback } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -12,119 +12,139 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 import {
   mediaDevices,
   RTCPeerConnection,
   RTCSessionDescription,
   RTCIceCandidate,
   RTCView,
-} from 'react-native-webrtc';
+} from "react-native-webrtc";
 
-const configuration = {iceServers: [{urls: 'stun:stun.l.google.com:19302'}]};
+const configuration = {
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+};
 
 const App = () => {
-  console.log('[App] render');
   const [enableVideo, setEnableVideo] = useState(true);
   const [enableAudio, setEnableAudio] = useState(true);
-  const [localOffer, setLocalOffer] = useState('');
-  const [remoteOfferInput, setRemoteOfferInput] = useState('');
-  const [localAnswer, setLocalAnswer] = useState('');
+  const [localOffer, setLocalOffer] = useState("");
+  const [remoteAnswerInput, setRemoteAnswerInput] = useState("");
+  const [remoteOfferInput, setRemoteOfferInput] = useState("");
+  const [localAnswer, setLocalAnswer] = useState("");
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
-  const [status, setStatus] = useState('');
+  const [dataInput, setDataInput] = useState("");
+  const [dataOutput, setDataOutput] = useState("");
+  const [connectionStatus, setConnectionStatus] = useState("Idle");
+  const [log, setLog] = useState("");
 
   const pcRef = useRef(null);
   const iceCandidatesRef = useRef([]);
   const gatheredRef = useRef(false);
+  const sendChannelRef = useRef(null);
+  const logRef = useRef("");
+
+  const addLog = useCallback((msg) => {
+    const ts = new Date().toLocaleTimeString();
+    const line = `[${ts}] ${msg}\n`;
+    logRef.current += line;
+    setLog(logRef.current);
+  }, []);
 
   const finishGathering = (pc) => {
-    console.log('finishGathering: called, already gathered=', gatheredRef.current);
+    addLog("finishGathering called, already=" + gatheredRef.current);
     if (gatheredRef.current) return;
     gatheredRef.current = true;
     const desc = pc.localDescription;
-    console.log('finishGathering: localDescription=', desc?.type, 'sdp length=', desc?.sdp?.length);
     if (!desc) {
-      console.log('finishGathering: no local description, aborting');
+      addLog("finishGathering: no localDescription");
       return;
     }
     const payload = JSON.stringify({
       sdp: desc,
       candidates: iceCandidatesRef.current,
     });
-    console.log('finishGathering: gathered', iceCandidatesRef.current.length, 'candidates, payload length=', payload.length);
-    console.log('finishGathering: desc.type=', desc.type, 'calling setState now');
-    if (desc.type === 'offer') {
-      console.log('finishGathering: setting localOffer');
+    addLog("Gathered " + iceCandidatesRef.current.length + " candidates");
+    if (desc.type === "offer") {
       setLocalOffer(payload);
-      setLocalAnswer('');
+      setConnectionStatus("Waiting for remote answer");
     } else {
-      console.log('finishGathering: setting localAnswer');
       setLocalAnswer(payload);
-      setLocalOffer('');
+      setConnectionStatus("Waiting for offerer to connect");
     }
-    console.log('finishGathering: setting status');
-    setStatus('Ready - ' + iceCandidatesRef.current.length + ' candidates');
   };
 
   const createPeerConnection = () => {
-    console.log('createPeerConnection: creating with config', JSON.stringify(configuration));
+    addLog("Creating RTCPeerConnection");
     const pc = new RTCPeerConnection(configuration);
-    console.log('createPeerConnection: created, signalingState=', pc.signalingState, 'iceGatheringState=', pc.iceGatheringState, 'iceConnectionState=', pc.iceConnectionState);
+
+    // Always create a data channel for sending
+    const sendChannel = pc.createDataChannel("data");
+    sendChannelRef.current = sendChannel;
+    sendChannel.onopen = () => addLog("Send data channel open");
+    sendChannel.onclose = () => addLog("Send data channel closed");
+    sendChannel.onerror = (e) =>
+      addLog("Send data channel error: " + e.message);
+
+    // Receive data channel from remote
+    pc.ondatachannel = (event) => {
+      addLog("Received data channel: " + event.channel.label);
+      const recvChannel = event.channel;
+      recvChannel.onmessage = (msg) => {
+        addLog("Data received: " + msg.data);
+        setDataOutput((prev) => prev + msg.data + "\n");
+      };
+      recvChannel.onopen = () => addLog("Receive data channel open");
+      recvChannel.onclose = () => addLog("Receive data channel closed");
+    };
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log('onicecandidate: got candidate, protocol=', event.candidate.protocol, 'type=', event.candidate.type, 'address=', event.candidate.address);
+        addLog("ICE candidate: " + (event.candidate.type || "unknown"));
         iceCandidatesRef.current.push(event.candidate);
         if (pc._scheduleFinish) pc._scheduleFinish();
       } else {
-        console.log('onicecandidate: null candidate (gathering complete signal)');
+        addLog("ICE gathering: null candidate (complete)");
         finishGathering(pc);
       }
     };
 
     pc.onicegatheringstatechange = () => {
-      const state = pc.iceGatheringState;
-      console.log('onicegatheringstatechange:', state);
-      setStatus('ICE gathering: ' + state);
-      if (state === 'complete') {
+      addLog("ICE gathering state: " + pc.iceGatheringState);
+      if (pc.iceGatheringState === "complete") {
         finishGathering(pc);
       }
     };
 
     pc.oniceconnectionstatechange = () => {
-      const state = pc.iceConnectionState;
-      console.log('oniceconnectionstatechange:', state);
-      setStatus('ICE connection: ' + state);
+      addLog("ICE connection: " + pc.iceConnectionState);
     };
 
     pc.onconnectionstatechange = () => {
+      addLog("Connection: " + pc.connectionState);
       const state = pc.connectionState;
-      console.log('onconnectionstatechange:', state);
-      setStatus('Connection: ' + state);
+      if (state === "connected") setConnectionStatus("Connected");
+      else if (state === "connecting") setConnectionStatus("Connecting...");
+      else if (state === "failed") setConnectionStatus("Failed");
+      else if (state === "disconnected") setConnectionStatus("Disconnected");
+      else if (state === "closed") setConnectionStatus("Closed");
     };
 
     pc.onsignalingstatechange = () => {
-      const state = pc.signalingState;
-      console.log('onsignalingstatechange:', state);
-      setStatus('Signaling: ' + state);
+      addLog("Signaling: " + pc.signalingState);
     };
 
     pc.onicecandidateerror = (event) => {
-      console.log('onicecandidateerror:', JSON.stringify(event));
-      setStatus('ICE error: ' + (event.errorText || event.errorCode || JSON.stringify(event)));
+      addLog("ICE error: " + (event.errorText || event.errorCode || ""));
     };
 
     pc.onnegotiationneeded = () => {
-      console.log('onnegotiationneeded fired');
-    };
-
-    pc.ondatachannel = (event) => {
-      console.log('ondatachannel:', event.channel?.label);
+      addLog("Negotiation needed");
     };
 
     pc.ontrack = (event) => {
-      console.log('ontrack: kind=', event.track?.kind, 'streams=', event.streams?.length);
+      addLog("Remote track: " + event.track?.kind);
       if (event.streams && event.streams[0]) {
         setRemoteStream(event.streams[0]);
       }
@@ -134,17 +154,15 @@ const App = () => {
     iceCandidatesRef.current = [];
     gatheredRef.current = false;
 
-    // On macOS, ICE gathering complete event may never fire.
-    // Use a debounce: finish 2s after the last candidate arrives.
+    // Debounce for ICE gathering completion
     let candidateTimer = null;
     const scheduleFinish = () => {
       if (candidateTimer) clearTimeout(candidateTimer);
       candidateTimer = setTimeout(() => {
-        console.log('ICE debounce: no new candidates for 2s, finishing');
+        addLog("ICE debounce timeout, finishing");
         finishGathering(pc);
       }, 2000);
     };
-    // Start timer immediately in case no candidates arrive at all
     scheduleFinish();
     pc._scheduleFinish = scheduleFinish;
 
@@ -152,350 +170,476 @@ const App = () => {
   };
 
   const createOffer = async () => {
+    addLog("Button: Create Offer");
     try {
-      setStatus('Creating offer...');
-      console.log('createOffer: start, enableVideo=', enableVideo, 'enableAudio=', enableAudio);
       const pc = createPeerConnection();
-      console.log('createOffer: peer connection created');
 
       if (enableVideo || enableAudio) {
-        console.log('createOffer: requesting getUserMedia');
+        addLog(
+          "Requesting getUserMedia video=" +
+            enableVideo +
+            " audio=" +
+            enableAudio,
+        );
         const stream = await mediaDevices.getUserMedia({
           video: enableVideo,
           audio: enableAudio,
         });
-        console.log('createOffer: got stream, tracks:', stream.getTracks().length);
         setLocalStream(stream);
-        stream.getTracks().forEach((track) => {
-          console.log('createOffer: adding track', track.kind, track.id);
-          pc.addTrack(track, stream);
-        });
-      } else {
-        console.log('createOffer: no media requested, creating data channel for ICE');
-        pc.createDataChannel('dummy');
+        stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+        addLog("Added " + stream.getTracks().length + " tracks");
       }
 
-      console.log('createOffer: calling createOffer');
       const offer = await pc.createOffer();
-      console.log('createOffer: offer created, type=', offer.type, 'sdp length=', offer.sdp?.length);
-      console.log('createOffer: calling setLocalDescription');
       await pc.setLocalDescription(offer);
-      console.log('createOffer: setLocalDescription done, signalingState=', pc.signalingState, 'iceGatheringState=', pc.iceGatheringState);
-      setStatus('Offer created, gathering ICE candidates...\nSignaling: ' + pc.signalingState + '\nICE gathering: ' + pc.iceGatheringState);
+      addLog("Offer created, waiting for ICE...");
     } catch (e) {
-      console.error('createOffer ERROR:', e);
-      setStatus('Error: ' + e.message);
+      addLog("ERROR createOffer: " + e.message);
     }
   };
 
   const createAnswer = async () => {
+    addLog("Button: Create Answer");
     try {
       if (!remoteOfferInput) {
-        setStatus('Paste a remote offer first');
+        addLog("No remote offer pasted");
         return;
       }
-      setStatus('Creating answer...');
-      console.log('createAnswer: start');
       let parsed;
       try {
         parsed = JSON.parse(remoteOfferInput);
-      } catch (parseErr) {
-        console.error('createAnswer: JSON parse failed:', parseErr);
-        setStatus('Error: invalid JSON - ' + parseErr.message);
+      } catch (e) {
+        addLog("ERROR: invalid JSON - " + e.message);
         return;
       }
-      const {sdp, candidates} = parsed;
-      console.log('createAnswer: parsed remote, sdp type=', sdp?.type, 'candidates=', candidates?.length);
+      const { sdp, candidates } = parsed;
+      addLog("Parsed remote offer, " + candidates.length + " candidates");
 
       const pc = createPeerConnection();
-      console.log('createAnswer: peer connection created');
 
-      // Add local media if enabled
       if (enableVideo || enableAudio) {
-        console.log('createAnswer: requesting getUserMedia');
         const stream = await mediaDevices.getUserMedia({
           video: enableVideo,
           audio: enableAudio,
         });
-        console.log('createAnswer: got stream, tracks:', stream.getTracks().length);
         setLocalStream(stream);
-        stream.getTracks().forEach((track) => {
-          console.log('createAnswer: adding track', track.kind, track.id);
-          pc.addTrack(track, stream);
-        });
+        stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+        addLog("Added " + stream.getTracks().length + " tracks");
       }
 
-      console.log('createAnswer: calling setRemoteDescription');
       await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-      console.log('createAnswer: setRemoteDescription done, signalingState=', pc.signalingState);
+      addLog("Remote description set");
 
-      // Add remote ICE candidates
-      console.log('createAnswer: adding', candidates.length, 'remote ICE candidates');
       for (const candidate of candidates) {
         await pc.addIceCandidate(new RTCIceCandidate(candidate));
       }
-      console.log('createAnswer: all remote candidates added');
+      addLog("Added " + candidates.length + " remote ICE candidates");
 
-      console.log('createAnswer: calling createAnswer');
       const answer = await pc.createAnswer();
-      console.log('createAnswer: answer created, type=', answer.type, 'sdp length=', answer.sdp?.length);
-      console.log('createAnswer: calling setLocalDescription');
       await pc.setLocalDescription(answer);
-      console.log('createAnswer: setLocalDescription done, signalingState=', pc.signalingState, 'iceGatheringState=', pc.iceGatheringState);
-      setStatus('Answer created, gathering ICE candidates...\nSignaling: ' + pc.signalingState + '\nICE gathering: ' + pc.iceGatheringState);
+      addLog("Answer created, waiting for ICE...");
     } catch (e) {
-      console.error('createAnswer ERROR:', e);
-      setStatus('Error: ' + e.message);
+      addLog("ERROR createAnswer: " + e.message);
     }
   };
 
   const connect = async () => {
+    addLog("Button: Connect");
     try {
       if (!pcRef.current) {
-        setStatus('Create an offer or answer first');
-        console.log('connect: no peer connection');
+        addLog("No peer connection");
         return;
       }
-      if (!remoteOfferInput) {
-        setStatus('Paste remote offer/answer first');
-        console.log('connect: no remote input');
+      if (!remoteAnswerInput) {
+        addLog("No remote answer pasted");
         return;
       }
-
-      console.log('connect: start');
-      const pc = pcRef.current;
-      console.log('connect: current signalingState=', pc.signalingState, 'iceConnectionState=', pc.iceConnectionState, 'connectionState=', pc.connectionState);
-
       let parsed;
       try {
-        parsed = JSON.parse(remoteOfferInput);
-      } catch (parseErr) {
-        console.error('connect: JSON parse failed:', parseErr);
-        setStatus('Error: invalid JSON - ' + parseErr.message);
+        parsed = JSON.parse(remoteAnswerInput);
+      } catch (e) {
+        addLog("ERROR: invalid JSON - " + e.message);
         return;
       }
-      const {sdp, candidates} = parsed;
-      console.log('connect: parsed remote, sdp type=', sdp?.type, 'candidates=', candidates?.length);
+      const { sdp, candidates } = parsed;
+      const pc = pcRef.current;
+      addLog("Parsed remote answer, " + candidates.length + " candidates");
 
       if (!pc.remoteDescription) {
-        console.log('connect: calling setRemoteDescription');
         await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-        console.log('connect: setRemoteDescription done, signalingState=', pc.signalingState);
-      } else {
-        console.log('connect: remoteDescription already set, skipping');
+        addLog("Remote description set");
       }
 
-      console.log('connect: adding', candidates.length, 'remote ICE candidates');
       for (const candidate of candidates) {
         await pc.addIceCandidate(new RTCIceCandidate(candidate));
       }
-      console.log('connect: all remote candidates added');
-      console.log('connect: iceConnectionState=', pc.iceConnectionState, 'connectionState=', pc.connectionState);
-
-      setStatus('Connecting...\nICE connection: ' + pc.iceConnectionState + '\nConnection: ' + pc.connectionState);
+      addLog("Added " + candidates.length + " remote ICE candidates");
+      addLog("Connecting... ICE=" + pc.iceConnectionState);
     } catch (e) {
-      console.error('connect ERROR:', e);
-      setStatus('Error: ' + e.message);
+      addLog("ERROR connect: " + e.message);
     }
   };
 
+  const sendData = () => {
+    addLog("Button: Send Data");
+    if (
+      !sendChannelRef.current ||
+      sendChannelRef.current.readyState !== "open"
+    ) {
+      addLog("Data channel not open");
+      return;
+    }
+    if (!dataInput) {
+      addLog("Nothing to send");
+      return;
+    }
+    sendChannelRef.current.send(dataInput);
+    addLog("Sent: " + dataInput);
+    setDataInput("");
+  };
+
   const reset = () => {
-    console.log('reset: clearing all state');
-    if (pcRef.current) {
-      pcRef.current.close();
-    }
-    if (localStream) {
-      localStream.release();
-    }
+    addLog("Button: Reset");
+    if (pcRef.current) pcRef.current.close();
+    if (localStream) localStream.release();
     pcRef.current = null;
+    sendChannelRef.current = null;
     iceCandidatesRef.current = [];
     gatheredRef.current = false;
     setLocalStream(null);
     setRemoteStream(null);
-    setLocalOffer('');
-    setLocalAnswer('');
-    setRemoteOfferInput('');
-    setStatus('');
+    setLocalOffer("");
+    setLocalAnswer("");
+    setRemoteOfferInput("");
+    setRemoteAnswerInput("");
+    setDataInput("");
+    setDataOutput("");
+    setConnectionStatus("Idle");
   };
 
   return (
     <SafeAreaView style={styles.body}>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Video views */}
-        <View style={styles.videoContainer}>
-          <View style={styles.videoWrapper}>
-            {localStream ? (
-              <RTCView streamURL={localStream.toURL()} style={styles.video} />
-            ) : (
-              <Text style={styles.videoPlaceholder}>Local Video</Text>
-            )}
-          </View>
-          <View style={styles.videoWrapper}>
-            {remoteStream ? (
-              <RTCView streamURL={remoteStream.toURL()} style={styles.video} />
-            ) : (
-              <Text style={styles.videoPlaceholder}>Remote Video</Text>
-            )}
-          </View>
-        </View>
-
-        {/* Switches */}
-        <View style={styles.row}>
-          <View style={styles.switchRow}>
-            <Text style={styles.text}>Enable Video</Text>
-            <View style={styles.switchBox}>
-              <Switch value={enableVideo} onValueChange={setEnableVideo} trackColor={{false: '#ccc', true: '#2563eb'}} thumbColor="#fff" />
+      <View style={styles.mainRow}>
+        {/* Left + Right signaling panels */}
+        <View style={styles.content}>
+          {/* Video views */}
+          <View style={styles.videoContainer}>
+            <View style={styles.videoWrapper}>
+              {localStream ? (
+                <RTCView streamURL={localStream.toURL()} style={styles.video} />
+              ) : (
+                <Text style={styles.videoPlaceholder}>Local Video</Text>
+              )}
+            </View>
+            <View style={styles.videoWrapper}>
+              {remoteStream ? (
+                <RTCView
+                  streamURL={remoteStream.toURL()}
+                  style={styles.video}
+                />
+              ) : (
+                <Text style={styles.videoPlaceholder}>Remote Video</Text>
+              )}
             </View>
           </View>
-          <View style={[styles.switchRow, styles.spacer]}>
-            <Text style={styles.text}>Enable Audio</Text>
-            <View style={styles.switchBox}>
-              <Switch value={enableAudio} onValueChange={setEnableAudio} trackColor={{false: '#ccc', true: '#2563eb'}} thumbColor="#fff" />
+
+          {/* Controls row */}
+          <View style={styles.row}>
+            <View style={styles.switchRow}>
+              <Text style={styles.text}>Video</Text>
+              <View style={styles.switchBox}>
+                <Switch
+                  value={enableVideo}
+                  onValueChange={setEnableVideo}
+                  trackColor={{ false: "#ccc", true: "#2563eb" }}
+                  thumbColor="#fff"
+                />
+              </View>
+            </View>
+            <View style={[styles.switchRow, { marginLeft: 12 }]}>
+              <Text style={styles.text}>Audio</Text>
+              <View style={styles.switchBox}>
+                <Switch
+                  value={enableAudio}
+                  onValueChange={setEnableAudio}
+                  trackColor={{ false: "#ccc", true: "#2563eb" }}
+                  thumbColor="#fff"
+                />
+              </View>
+            </View>
+            <View style={{ marginLeft: 12 }}>
+              <TouchableOpacity
+                style={[styles.button, styles.buttonRed]}
+                onPress={reset}
+              >
+                <Text style={styles.buttonText}>Reset</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Signaling panels */}
+          <View style={styles.statusBar}>
+            <Text style={styles.statusText}>Status: {connectionStatus}</Text>
+          </View>
+          <View style={styles.panelsRow}>
+            {/* Left panel: Offerer side */}
+            <View style={styles.panel}>
+              <TouchableOpacity style={styles.button} onPress={createOffer}>
+                <Text style={styles.buttonText}>Create Offer</Text>
+              </TouchableOpacity>
+              <Text style={styles.label}>Local Offer (copy this):</Text>
+              <TextInput
+                style={[styles.textBox, styles.readonlyBox]}
+                value={localOffer}
+                editable={false}
+                multiline
+                selectTextOnFocus
+                placeholderTextColor="#999"
+                placeholder="Offer will appear here..."
+              />
+              <Text style={styles.label}>Paste Remote Answer:</Text>
+              <TextInput
+                style={styles.textBox}
+                value={remoteAnswerInput}
+                onChangeText={setRemoteAnswerInput}
+                multiline
+                placeholder="Paste answer JSON here"
+              />
+              <TouchableOpacity
+                style={[styles.button, styles.buttonGreen, { marginTop: 8 }]}
+                onPress={connect}
+              >
+                <Text style={styles.buttonText}>Connect</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Vertical divider */}
+            <View style={styles.divider} />
+
+            {/* Right panel: Answerer side */}
+            <View style={styles.panel}>
+              <Text style={styles.label}>Paste Remote Offer:</Text>
+              <TextInput
+                style={styles.textBox}
+                value={remoteOfferInput}
+                onChangeText={setRemoteOfferInput}
+                multiline
+                placeholder="Paste offer JSON here"
+              />
+              <TouchableOpacity
+                style={[styles.button, { marginTop: 8 }]}
+                onPress={createAnswer}
+              >
+                <Text style={styles.buttonText}>Create Answer</Text>
+              </TouchableOpacity>
+              <Text style={styles.label}>Local Answer (copy this):</Text>
+              <TextInput
+                style={[styles.textBox, styles.readonlyBox]}
+                value={localAnswer}
+                editable={false}
+                multiline
+                selectTextOnFocus
+                placeholderTextColor="#999"
+                placeholder="Answer will appear here..."
+              />
+            </View>
+          </View>
+
+          {/* Data channel */}
+          <View style={styles.panelsRow}>
+            <View style={styles.panel}>
+              <Text style={styles.label}>Data Input:</Text>
+              <View style={styles.row}>
+                <TextInput
+                  style={[styles.textBox, { height: 36, flex: 1 }]}
+                  value={dataInput}
+                  onChangeText={setDataInput}
+                  placeholder="Type message..."
+                />
+                <TouchableOpacity
+                  style={[styles.button, { marginLeft: 8 }]}
+                  onPress={sendData}
+                >
+                  <Text style={styles.buttonText}>Send</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.panel}>
+              <Text style={styles.label}>Data Output:</Text>
+              <TextInput
+                style={[styles.textBox, styles.readonlyBox, { height: 60 }]}
+                value={dataOutput}
+                editable={false}
+                multiline
+                selectTextOnFocus
+                placeholderTextColor="#999"
+                placeholder="Received data appears here..."
+              />
             </View>
           </View>
         </View>
 
-        {/* Create Offer */}
-        <View style={styles.row}>
-          <TouchableOpacity style={styles.button} onPress={createOffer}>
-            <Text style={styles.buttonText}>Create Offer</Text>
-          </TouchableOpacity>
+        {/* Log panel on the right */}
+        <View style={styles.logPanel}>
+          <Text style={styles.logTitle}>Log</Text>
+          <ScrollView style={styles.logScroll}>
+            <TextInput
+              style={styles.logText}
+              value={log}
+              editable={false}
+              multiline
+              selectTextOnFocus
+            />
+          </ScrollView>
         </View>
-
-        {/* Local Offer/Answer (read-only, copyable) */}
-        <Text style={styles.label}>Local Offer/Answer (copy this):</Text>
-        <TextInput
-          style={styles.textBox}
-          value={localOffer || localAnswer}
-          editable={false}
-          multiline
-          selectTextOnFocus
-        />
-
-        {/* Remote input */}
-        <Text style={styles.label}>Paste Remote Offer/Answer:</Text>
-        <TextInput
-          style={styles.textBox}
-          value={remoteOfferInput}
-          onChangeText={setRemoteOfferInput}
-          multiline
-          placeholder="Paste remote offer or answer JSON here"
-        />
-
-        {/* Create Answer & Connect */}
-        <View style={styles.row}>
-          <TouchableOpacity style={styles.button} onPress={createAnswer}>
-            <Text style={styles.buttonText}>Create Answer</Text>
-          </TouchableOpacity>
-          <View style={{width: 12}} />
-          <TouchableOpacity style={[styles.button, styles.buttonGreen]} onPress={connect}>
-            <Text style={styles.buttonText}>Connect</Text>
-          </TouchableOpacity>
-          <View style={{width: 12}} />
-          <TouchableOpacity style={[styles.button, styles.buttonRed]} onPress={reset}>
-            <Text style={styles.buttonText}>Reset</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Status */}
-        {status ? <Text style={styles.status}>{status}</Text> : null}
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   body: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     flex: 1,
   },
-  container: {
-    padding: 16,
-    alignItems: 'flex-start',
+  mainRow: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  content: {
+    flex: 1,
+    padding: 12,
   },
   videoContainer: {
-    flexDirection: 'row',
-    height: 200,
-    marginBottom: 12,
-    alignSelf: 'stretch',
+    flexDirection: "row",
+    height: 160,
+    marginBottom: 8,
   },
   videoWrapper: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: "#1a1a2e",
     marginHorizontal: 4,
     borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   video: {
-    ...StyleSheet.absoluteFillObject,
+    flex: 1,
+    width: "100%",
   },
   videoPlaceholder: {
-    color: '#888',
-    fontSize: 14,
+    color: "#888",
+    fontSize: 13,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 8,
-  },
-  spacer: {
-    marginLeft: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 4,
   },
   switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   switchBox: {
-    backgroundColor: '#e2e2e2',
+    backgroundColor: "#e2e2e2",
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#999',
+    borderColor: "#999",
     padding: 2,
   },
   text: {
-    color: '#111',
-    marginRight: 8,
+    color: "#111",
+    marginRight: 6,
+    fontSize: 13,
   },
   label: {
-    marginTop: 12,
-    marginBottom: 4,
-    fontWeight: '600',
-    color: '#111',
+    marginTop: 8,
+    marginBottom: 2,
+    fontWeight: "600",
+    color: "#111",
+    fontSize: 12,
+  },
+  panelsRow: {
+    flexDirection: "row",
+    marginTop: 8,
+  },
+  statusBar: {
+    marginTop: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: "#1a1a2e",
+    borderRadius: 4,
+    alignSelf: "stretch",
+  },
+  statusText: {
+    color: "#4ade80",
+    fontWeight: "700",
+    fontSize: 13,
+  },
+  panel: {
+    flex: 1,
+  },
+  divider: {
+    width: 1,
+    backgroundColor: "#ccc",
+    marginHorizontal: 12,
   },
   textBox: {
     borderWidth: 1,
-    borderColor: '#999',
+    borderColor: "#999",
     borderRadius: 4,
-    padding: 8,
-    height: 100,
-    fontFamily: 'Menlo',
-    fontSize: 11,
-    color: '#111',
-    backgroundColor: '#f9f9f9',
-    alignSelf: 'stretch',
+    padding: 6,
+    height: 80,
+    fontFamily: "Menlo",
+    fontSize: 10,
+    color: "#111",
+    backgroundColor: "#fff",
   },
-  status: {
-    marginTop: 12,
-    color: '#333',
-    fontStyle: 'italic',
+  readonlyBox: {
+    backgroundColor: "#f0f0f0",
+    color: "#666",
   },
   button: {
-    backgroundColor: '#2563eb',
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: 6,
+    backgroundColor: "#2563eb",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 5,
+    alignSelf: "flex-start",
+    marginTop: 4,
   },
   buttonGreen: {
-    backgroundColor: '#16a34a',
+    backgroundColor: "#16a34a",
   },
   buttonRed: {
-    backgroundColor: '#dc2626',
+    backgroundColor: "#dc2626",
   },
   buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 12,
+  },
+  logPanel: {
+    width: 400,
+    borderLeftWidth: 1,
+    borderLeftColor: "#ccc",
+    backgroundColor: "#fafafa",
+    padding: 8,
+  },
+  logTitle: {
+    fontWeight: "700",
+    fontSize: 12,
+    color: "#333",
+    marginBottom: 4,
+  },
+  logScroll: {
+    flex: 1,
+  },
+  logText: {
+    fontFamily: "Menlo",
+    fontSize: 9,
+    color: "#333",
+    lineHeight: 14,
   },
 });
 
