@@ -195,6 +195,10 @@
             <label>Audio</label
             ><input type="checkbox" id="enableAudio" checked />
           </div>
+          <div class="switch-row">
+            <label>H.264 Video Only</label
+            ><input type="checkbox" id="enableH264Only" checked />
+          </div>
           <button class="btn btn-red" onclick="reset()">Reset</button>
         </div>
         <div class="status-bar">
@@ -376,6 +380,24 @@
           }
           if (!v) pc.addTransceiver('video', { direction: 'recvonly' });
           if (!a) pc.addTransceiver('audio', { direction: 'recvonly' });
+
+          if (document.getElementById("enableH264Only").checked) {
+            const videoTransceiver = pc.getTransceivers().find(
+              t => t.sender?.track?.kind === "video"
+            );
+
+            if (videoTransceiver?.setCodecPreferences) {
+              const h264 = RTCRtpSender
+                .getCapabilities("video")
+                .codecs
+                .filter(c => c.mimeType === "video/H264");
+
+              addLog('Offer nailed to H264');
+              videoTransceiver.setCodecPreferences(h264);
+            } else {
+              addLog('Offer failed to nail H264');
+            }
+          }
           const offer = await pc.createOffer();
           await pc.setLocalDescription(offer);
           addLog("Offer created, waiting for ICE...");
