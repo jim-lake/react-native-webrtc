@@ -10,6 +10,8 @@
 #import "WebRTCModule+RTCPeerConnection.h"
 #import "WebRTCModule.h"
 #import "WebRTCModuleOptions.h"
+#import "CaptureController.h"
+#import "RTCMediaStreamTrack+React.h"
 
 @interface WebRTCModule ()
 @end
@@ -21,6 +23,10 @@
 }
 
 - (void)dealloc {
+    for (NSString *trackId in _localTracks) {
+        RTCMediaStreamTrack *track = _localTracks[trackId];
+        [track.captureController stopCapture];
+    }
     [_localTracks removeAllObjects];
     _localTracks = nil;
     [_localStreams removeAllObjects];
