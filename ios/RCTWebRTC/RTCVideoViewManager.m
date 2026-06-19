@@ -9,6 +9,7 @@
 #if TARGET_OS_OSX
 // Use NSClassFromString at runtime since RTCMTLNSVideoView may not be available
 #import <WebRTC/RTCVideoRenderer.h>
+#import "RTCMacOSVideoView.h"
 #else
 #import <WebRTC/RTCMTLVideoView.h>
 #endif
@@ -94,14 +95,18 @@
 
     if (videoTrack && self.videoView) {
         if (self.window) {
+            RCTLog(@"RTCVideoView: moved to window, adding renderer for track %@", videoTrack.trackId);
             dispatch_async(_module.workerQueue, ^{
                 [videoTrack addRenderer:self.videoView];
             });
         } else {
+            RCTLog(@"RTCVideoView: removed from window, removing renderer for track %@", videoTrack.trackId);
             dispatch_async(_module.workerQueue, ^{
                 [videoTrack removeRenderer:self.videoView];
             });
         }
+    } else if (videoTrack && !self.videoView) {
+        RCTLogError(@"RTCVideoView: didMoveToWindow but videoView is nil - track=%@", videoTrack.trackId);
     }
 }
 
@@ -116,9 +121,14 @@
 #if TARGET_OS_OSX
         Class MTLViewClass = NSClassFromString(@"RTCMTLNSVideoView");
         if (MTLViewClass) {
+            RCTLog(@"RTCVideoView: using RTCMTLNSVideoView for rendering");
             NSView *subview = [[MTLViewClass alloc] initWithFrame:CGRectZero];
             subview.wantsLayer = YES;
             _videoView = (id)subview;
+        } else {
+            RCTLogWarn(@"RTCVideoView: RTCMTLNSVideoView not available in WebRTC framework, using fallback CoreImage renderer");
+            RTCMacOSVideoView *fallback = [[RTCMacOSVideoView alloc] initWithFrame:CGRectZero];
+            _videoView = (id)fallback;
         }
 #else
         RTCMTLVideoView *subview = [[RTCMTLVideoView alloc] initWithFrame:CGRectZero];
@@ -134,6 +144,8 @@
 #else
             self.videoView.delegate = self;
 #endif
+        } else {
+            RCTLogError(@"RTCVideoView: videoView is nil after initialization - video will not render");
         }
     }
 
@@ -258,7 +270,14 @@
     if (_objectFit != fit) {
         _objectFit = fit;
 
-#if !TARGET_OS_OSX
+#if TARGET_OS_OSX
+        if ([self.videoView isKindOfClass:[RTCMacOSVideoView class]]) {
+            RTCMacOSVideoView *fallback = (RTCMacOSVideoView *)self.videoView;
+            fallback.videoGravity = (fit == RTCVideoViewObjectFitCover)
+                ? AVLayerVideoGravityResizeAspectFill
+                : AVLayerVideoGravityResizeAspect;
+        }
+#else
         if (fit == RTCVideoViewObjectFitCover) {
             self.videoView.videoContentMode = UIViewContentModeScaleAspectFill;
         } else {
@@ -288,6 +307,8 @@
             dispatch_async(_module.workerQueue, ^{
                 [oldValue removeRenderer:self.videoView];
             });
+        } else if (oldValue && !self.videoView) {
+            RCTLogWarn(@"RTCVideoView: removing old track but videoView is nil");
         }
 
 #if !TARGET_OS_OSX
@@ -329,13 +350,20 @@
             }
 
             CVPixelBufferRelease(pixelBuffer);
+        } else {
+            RCTLogWarn(@"RTCVideoView: CVPixelBufferCreate failed with error %d", err);
         }
 
         // See "didMoveToWindow" above.
         if (videoTrack && self.window && self.videoView) {
+            RCTLog(@"RTCVideoView: adding renderer for track %@", videoTrack.trackId);
             dispatch_async(_module.workerQueue, ^{
                 [videoTrack addRenderer:self.videoView];
             });
+        } else if (videoTrack && !self.videoView) {
+            RCTLogError(@"RTCVideoView: cannot add renderer - videoView is nil, track=%@", videoTrack.trackId);
+        } else if (videoTrack && !self.window) {
+            RCTLog(@"RTCVideoView: deferring addRenderer until view moves to window, track=%@", videoTrack.trackId);
         }
     }
 }
@@ -392,6 +420,7 @@ RCT_EXPORT_VIEW_PROPERTY(onDimensionsChange, RCTDirectEventBlock)
 
 RCT_CUSTOM_VIEW_PROPERTY(streamURL, NSString *, RTCVideoView) {
     if (!json) {
+        RCTLog(@"RTCVideoView: streamURL cleared");
         view.videoTrack = nil;
         return;
     }
@@ -399,13 +428,25 @@ RCT_CUSTOM_VIEW_PROPERTY(streamURL, NSString *, RTCVideoView) {
     NSString *streamReactTag = json;
     WebRTCModule *module = view.module;
 
+    if (!module) {
+        RCTLogError(@"RTCVideoView: WebRTCModule is nil, cannot look up stream for tag: %@", streamReactTag);
+        return;
+    }
+
+    RCTLog(@"RTCVideoView: setting streamURL=%@", streamReactTag);
+
     dispatch_async(module.workerQueue, ^{
         RTCMediaStream *stream = [module streamForReactTag:streamReactTag];
-        NSArray *videoTracks = stream ? stream.videoTracks : @[];
+        if (!stream) {
+            RCTLogWarn(@"RTCVideoView: no stream found for react tag: %@", streamReactTag);
+            return;
+        }
+        NSArray *videoTracks = stream.videoTracks;
         RTCVideoTrack *videoTrack = [videoTracks firstObject];
         if (!videoTrack) {
-            RCTLogWarn(@"No video stream for react tag: %@", streamReactTag);
+            RCTLogWarn(@"RTCVideoView: stream found but has no video tracks, react tag: %@, audioTracks=%lu", streamReactTag, (unsigned long)stream.audioTracks.count);
         } else {
+            RCTLog(@"RTCVideoView: found video track %@ for stream %@", videoTrack.trackId, streamReactTag);
             dispatch_async(dispatch_get_main_queue(), ^{
                 view.videoTrack = videoTrack;
             });
